@@ -5,20 +5,29 @@ headers = {
     'Authorization': 'Bearer 6d63bba91b51d2c51c73f2cf3c64b835',
 }
 
-liste_initiale = requests.get('https://shiftheroes.fr/api/v1/plannings?type=daily', headers=headers).json()
-nouvelle_liste = requests.get('https://shiftheroes.fr/api/v1/plannings?type=daily', headers=headers).json()
+try:
+    liste_initiale = requests.get('https://shiftheroes.fr/api/v1/plannings?type=daily', headers=headers).json()
+    nouvelle_liste = requests.get('https://shiftheroes.fr/api/v1/plannings?type=daily', headers=headers).json()
+except requests.RequestException as e:
+    print(f"Une erreur s'est produite : {e}")
+    exit()
 
 while liste_initiale == nouvelle_liste:
-    time.sleep(1)
-    print('.', end='', flush=True)
-    nouvelle_liste = requests.get('https://shiftheroes.fr/api/v1/plannings?type=daily', headers=headers).json()
-    
+    try:
+        time.sleep(1)
+        print('.', end='', flush=True)
+        nouvelle_liste = requests.get('https://shiftheroes.fr/api/v1/plannings?type=daily', headers=headers).json()
+    except requests.RequestException as e:
+        print(f"\nUne erreur s'est produite : {e}")
+        exit()
 
-print("nouveau planning publié !")
+print("\nnouveau planning publié !")
 
-planning_id = nouvelle_liste[0]['id']
-print(planning_id)
-response_shift = requests.get(f'https://shiftheroes.fr/api/v1/plannings/{planning_id}/shifts', headers=headers)
-
-# response_reservation = requests.post(f'https://shiftheroes.fr/api/v1/plannings/{planning_id}/shifts/{shift_id}/reservations', headers=headers)
-# print(response_reservation.json())
+try:
+    planning_id = nouvelle_liste[0]['id']
+    response_shift = requests.get(f'https://shiftheroes.fr/api/v1/plannings/{planning_id}/shifts', headers=headers).json()
+    print(response_shift)
+except (IndexError, KeyError) as e:
+    print(f"Une erreur s'est produite lors de l'accès aux données : {e}")
+except requests.RequestException as e:
+    print(f"Une erreur s'est produite : {e}")
